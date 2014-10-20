@@ -3,10 +3,13 @@
 *.*sv
 
 
-# MS office docs
+# Office docs
 *.xls*
 *.doc*
 *.ppt*
+*.numbers
+*.pages
+*.key
 
 
 # archives
