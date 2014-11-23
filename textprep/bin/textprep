@@ -1,0 +1,95 @@
+#!/bin/env python
+
+###
+#
+# textprep
+#
+# Utility for pre-processing text data sets for data analysis tasks
+#
+###
+import nltk
+import os
+from optparse import OptionParser
+import text_util
+
+def rebuild_poslist(tokens, poslist):
+    '''
+     rebuilds the pos-tagged list with post-processed tokens list, but preserving tags
+    '''
+    output = []
+    for i in range(len(tokens)):
+        output.append((tokens[i], poslist[i][1]))
+    return output
+
+def main():
+    # grab parameters
+    mainparser = OptionParser()
+    mainparser.add_option('--sourcefile', action='store', type='string', default=None, dest='sourcefile',
+        help='File to process.')
+    mainparser.add_option('--sourcedir', action='store', type='string', default=None, dest='sourcedir',
+        help='Directory to process - will process all files in it.')
+    mainparser.add_option('--anon-names', action='store_true', default=None, dest='anon_names',
+        help='Anonymize person names (converts to PERSON)')
+    mainparser.add_option('--anon-orgs', action='store_true', default=None, dest='anon_orgs',
+        help='Anonymize org names (converts to ORGANIZATION)')
+    mainparser.add_option('--spellcheck', action='store_true', default=None, dest='spellcheck',
+        help='Runs spell corrector')
+    mainparser.add_option('--verbose', action='store_true', default=None, dest='verbose',
+        help='Prints to screen')
+    (options, args) = mainparser.parse_args()
+
+    # loads files to process
+    filelist=[]
+    if options.sourcefile:
+        filelist.append(options.sourcefile)
+    if options.sourcedir:
+        filelist += [os.path.join(options.sourcedir, file) for file in os.listdir(options.sourcedir)]
+
+    # initialization
+    if options.verbose: print 'Initializing anonymizer and spell checkers...'
+    if options.anon_names:
+        names_an = text_util.NamesAnonymizer()
+    if options.anon_orgs:
+        org_an = text_util.OrgAnonymizer()
+    if options.spellcheck:
+        spellchecker = text_util.SpellChecker()
+
+    # iterates files
+    for infile in filelist:
+        if options.verbose: print 'Processing %s...' % infile
+        # read and tokenize
+        try:
+            f = open(infile)
+            tkinput = nltk.word_tokenize(f.read())
+        except Exception, e:
+            print 'Error loading %s: %s' % (infile, str(e))
+            continue
+
+        # POS-tag once
+        tkinput_pos = nltk.pos_tag(tkinput)
+
+        # processing options
+        outtokens = [t for t in tkinput]
+        if options.anon_names:
+            outtokens = names_an.anonymize_tokens(outtokens, tkinput_pos)
+            tkinput_pos = rebuild_poslist(outtokens, tkinput_pos)
+
+        if options.anon_orgs:
+            outtokens = org_an.anonymize_tokens(outtokens, tkinput_pos)
+            tkinput_pos = rebuild_poslist(outtokens, tkinput_pos)
+
+        if options.spellcheck:
+            outtokens = spellchecker.correct_tokens(outtokens, tkinput_pos)
+
+        # completed processing of this file
+        outstr = ' '.join(outtokens)
+        if options.verbose: 
+           print outstr
+           print 'Writting %s ... ' % (infile+'.pre')
+
+        f = open(infile+'.pre','w')
+        f.write(outstr)
+        f.close()
+
+if (__name__ == '__main__'):
+    main()
