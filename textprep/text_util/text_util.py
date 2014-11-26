@@ -146,7 +146,7 @@ class NamesAnonymizer(TextProcessor):
                    print '[anonymizer] rule 3: replacing '+lemma
                    outtoken=anonstr
                # Rule 4: in NE list and present in names list
-               elif ((token, pos) in ne_candidates) and (lemma in self.all_names):
+               elif ((token, pos) in ne_candidates) and (not nltk.wordnet.wordnet.synsets(lemma, pos='n')) and (lemma in self.all_names):
                    print '[anonymizer] rule 4: replacing '+lemma
                    outtoken=anonstr
             outputlist.append(outtoken)
@@ -177,7 +177,8 @@ class SpellChecker(TextProcessor):
         self.freqdist = nltk.FreqDist(w.lower() for w in gut)
         # ignore lists
         self.IGNOREPOS = set(['NNP', '.', ',', ':', 'CD'])
-        self.IGNORETOKENS = set(['PERSON', 'ORGANIZATION', "n't", "'s", "'d"])
+        self.IGNORETOKENS = set(['PERSON', 'ORGANIZATION', "n't", "'s", "'d", "'ve", "'ll", "'nt", "'", "&", "n/a", "etc", "na",
+                                 "tbc", "tbd", "tba"])
 
     def _load_wordlists(self, wordlistfile=None):
         '''
@@ -227,6 +228,23 @@ class SpellChecker(TextProcessor):
         # now cap at word limits
         return suggested[:limit]
 
+    def _is_candidate(self, word, pos):
+        '''
+         boolean that determines if word/pos pair is a candidate for spell checking, based on current ignore rules and
+         word list to ignore.
+
+         Evaluates as follows:
+         - not in ignore list
+         - pos not in ignore list (punctuations, NNP, CD)
+         - not capitalized
+         - not in dictionary
+         - only alphabet words
+         - > 1 chars
+        '''
+        return (pos not in self.IGNOREPOS) and (word not in self.IGNORETOKENS) and (not self.is_word(word))\
+               and len(word)>1 and word.isalpha() and not word.istitle()
+           
+
     def correct_tokens(self, inputlist, pos_taglist=None):
         '''
          Given a list of input tokens, runs spell checker auto-correcting mistakes
@@ -236,8 +254,8 @@ class SpellChecker(TextProcessor):
             pos_taglist=nltk.pos_tag(inputlist)
        
         outtokens = []
-        for (token,pos) in pos_taglist:
-            if pos not in self.IGNOREPOS and token not in self.IGNORETOKENS and not self.is_word(token):
+        for (token, pos) in pos_taglist:
+            if self._is_candidate(token, pos):
                 suggestions=self.suggest(token)
                 if suggestions:
                     outtokens.append(suggestions[0])
