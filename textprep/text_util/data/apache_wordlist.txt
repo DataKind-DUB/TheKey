@@ -10859,6 +10859,7 @@ batch's
 batcher
 bate
 debate
+debating
 bated
 rebate
 bates
@@ -22909,6 +22910,7 @@ chorusing
 choruses
 chose
 chosen
+chosing
 choux
 chow
 chowing
@@ -65510,6 +65512,7 @@ incorruptibly
 increasable
 increase
 increasings
+increasing
 increasingly
 increaser
 increaser's
@@ -124543,6 +124546,7 @@ tail
 retail
 tail's
 detail
+detailed
 tailed
 tails
 tailing

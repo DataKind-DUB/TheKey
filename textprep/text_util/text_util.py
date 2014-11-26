@@ -169,16 +169,20 @@ class SpellChecker(TextProcessor):
       In the future this may support pyenchant or another core library with better functionality.
     '''
     
-    def __init__(self, wordlistfile=None):
+    def __init__(self, wordlistfile=None, ignore_list=[]):
         self.alphabet='abcdefghijklmnopqrstuvwxyz'
-        self.wordlist = self._load_wordlists(wordlistfile)
+        self.wordlist=self._load_wordlists(wordlistfile)
         # prepare freq dist data, use gutemberg corpus
-        gut = nltk.corpus.gutenberg.words()
-        self.freqdist = nltk.FreqDist(w.lower() for w in gut)
+        gut=nltk.corpus.gutenberg.words()
+        self.freqdist=nltk.FreqDist(w.lower() for w in gut)
         # ignore lists
-        self.IGNOREPOS = set(['NNP', '.', ',', ':', 'CD'])
-        self.IGNORETOKENS = set(['PERSON', 'ORGANIZATION', "n't", "'s", "'d", "'ve", "'ll", "'nt", "'", "&", "n/a", "etc", "na",
+        self.IGNOREPOS=set(['NNP', '.', ',', ':', 'CD'])
+        self.IGNORETOKENS=set(["n't", "'s", "'d", "'ve", "'ll", "'nt", "'", "&", "n/a", "etc", "na",
                                  "tbc", "tbd", "tba"])
+        if ignore_list: self.IGNORETOKENS = self.IGNORETOKENS.union(set(ignore_list))
+
+        # a lemmatizer
+        self.wnl=nltk.wordnet.WordNetLemmatizer()
 
     def _load_wordlists(self, wordlistfile=None):
         '''
@@ -241,9 +245,9 @@ class SpellChecker(TextProcessor):
          - only alphabet words
          - > 1 chars
         '''
-        return (pos not in self.IGNOREPOS) and (word not in self.IGNORETOKENS) and (not self.is_word(word))\
-               and len(word)>1 and word.isalpha() and not word.istitle()
-           
+        return (pos not in self.IGNOREPOS) and len(word)>2 and (word not in self.IGNORETOKENS)\
+               and word.isalpha() and not word.istitle() and not word.isupper()\
+               and not self.is_word(self.wnl.lemmatize(word))
 
     def correct_tokens(self, inputlist, pos_taglist=None):
         '''
