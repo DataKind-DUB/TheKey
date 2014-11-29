@@ -175,6 +175,7 @@ class SpellChecker(TextProcessor):
         # prepare freq dist data, use gutemberg corpus
         gut=nltk.corpus.gutenberg.words()
         self.freqdist=nltk.FreqDist(w.lower() for w in gut)
+        self.VBPOS = set(['VB', 'VBZ', 'VBN', 'VBG', 'VBD'])
         # ignore lists
         self.IGNOREPOS=set(['NNP', '.', ',', ':', 'CD'])
         self.IGNORETOKENS=set(["n't", "'s", "'d", "'ve", "'ll", "'nt", "'", "&", "n/a", "etc", "na",
@@ -232,6 +233,15 @@ class SpellChecker(TextProcessor):
         # now cap at word limits
         return suggested[:limit]
 
+    def _lemmatize(self, word, pos):
+        '''
+         returns lemmatized word based on pos
+        '''
+        if pos in self.VBPOS:
+            return self.wnl.lemmatize(word, 'v')
+        else:
+            return self.wnl.lemmatize(word)
+
     def _is_candidate(self, word, pos):
         '''
          boolean that determines if word/pos pair is a candidate for spell checking, based on current ignore rules and
@@ -243,11 +253,11 @@ class SpellChecker(TextProcessor):
          - not capitalized
          - not in dictionary
          - only alphabet words
-         - > 1 chars
+         - > 2 chars
         '''
         return (pos not in self.IGNOREPOS) and len(word)>2 and (word not in self.IGNORETOKENS)\
                and word.isalpha() and not word.istitle() and not word.isupper()\
-               and not self.is_word(self.wnl.lemmatize(word))
+               and not self.is_word(self._lemmatize(word, pos))
 
     def correct_tokens(self, inputlist, pos_taglist=None):
         '''
