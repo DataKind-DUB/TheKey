@@ -41,6 +41,7 @@ sdist
 develop-eggs
 .installed.cfg
 lib*
+*.pyc
 # Install logs
 pip-log.txt
 # unit test / coverage reports
@@ -67,5 +68,5 @@ dev.yaml
 # misc
 *.asc
 .DS_Store
-
+*.swp
 

@@ -5,7 +5,7 @@ from distutils.core import setup
 
 setup(
     name='Textprep',
-    version='0.2.dev',
+    version='0.4.dev',
     author='Bruno Ohana',
     author_email='bohana@gmail.com',
     packages=['text_util'],
