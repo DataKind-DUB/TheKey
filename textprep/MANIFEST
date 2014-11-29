@@ -2,6 +2,7 @@
 MANIFEST.in
 README.md
 setup.py
+bin/dokey.py
 bin/get_names.sh
 bin/textprep
 text_util/__init__.py

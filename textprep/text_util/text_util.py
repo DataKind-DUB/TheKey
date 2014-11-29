@@ -138,7 +138,7 @@ class NamesAnonymizer(TextProcessor):
                    print '[anonymizer] rule 1: replacing '+lemma
                    outtoken=anonstr
                # Rule 2: tagged as NNP and in list of all names
-               elif (pos == 'NNP') and (not nltk.wordnet.wordnet.synsets(lemma, pos='n')) and (lemma in self.all_names):
+               elif (pos == 'NNP') and (not nltk.wordnet.wordnet.synsets(lemma)) and (lemma in self.all_names):
                    print '[anonymizer] rule 2: replacing '+lemma
                    outtoken=anonstr
                # Rule 3: NNP and high frequency names - dont care if its lexicalized, just trust it
@@ -146,7 +146,7 @@ class NamesAnonymizer(TextProcessor):
                    print '[anonymizer] rule 3: replacing '+lemma
                    outtoken=anonstr
                # Rule 4: in NE list and present in names list
-               elif ((token, pos) in ne_candidates) and (not nltk.wordnet.wordnet.synsets(lemma, pos='n')) and (lemma in self.all_names):
+               elif ((token, pos) in ne_candidates) and (not nltk.wordnet.wordnet.synsets(lemma)) and (lemma in self.all_names):
                    print '[anonymizer] rule 4: replacing '+lemma
                    outtoken=anonstr
             outputlist.append(outtoken)
@@ -181,7 +181,7 @@ class SpellChecker(TextProcessor):
         self.IGNORETOKENS=set(["n't", "'s", "'d", "'ve", "'ll", "'nt", "'", "&", "n/a", "etc", "na",
                                  "tbc", "tbd", "tba"])
         if ignore_list: self.IGNORETOKENS = self.IGNORETOKENS.union(set(ignore_list))
-
+        self.PREFERENCETOKENS = set([])
         # a lemmatizer
         self.wnl=nltk.wordnet.WordNetLemmatizer()
 
@@ -196,6 +196,12 @@ class SpellChecker(TextProcessor):
         words_set = self._get_names_lookup(wordlistfile)
         return words_set
 
+    def set_preferred_words(self, wordlist):
+        '''
+          adds domain-specific preferred words. This bypasses the ranking algorithm based on the gutemberg corpus in favor
+          of words known to occur more frequently in a specific domain
+        '''
+        self.PREFERENCETOKENS.union(set([self.sanitize(w) for w in wordlist]))
 
     def is_word(self, word):
         '''
@@ -226,7 +232,11 @@ class SpellChecker(TextProcessor):
         if self.is_word(word):
             suggested.append(word)
         # now check which permutations e know of, compile list of tuples (found word, frequency)
-        found_words=[(w, self.freqdist.freq(w)) for w in self.edits(self.sanitize(word)) if w in self.wordlist]
+        word_edits=self.edits(self.sanitize(word))
+        found_words=[(w, self.freqdist.freq(w)) for w in word_edits if self.is_word(w)]
+        # if a word in in the preferred list, make it artificially high frequency
+        prefer_words=[(w,2) for w in word_edits if self.is_word(w) and w in self.PREFERENCETOKENS]
+        found_words += prefer_words
         # sort this list by frequency of ocurrence
         found_words.sort(key=lambda x:x[1], reverse=True)
         suggested += [w[0] for w in found_words]
