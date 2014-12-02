@@ -107,7 +107,7 @@ CREATE TABLE group_project_member_skill (
     group_project_member_id integer    NOT NULL ,
     is_before integer    NOT NULL ,
     is_after integer    NOT NULL ,
-    timestamp timestamp    NOT NULL ,
+    registered_date timestamp    NOT NULL ,
     CONSTRAINT group_project_member_skill_pk PRIMARY KEY (id)
 );
 
