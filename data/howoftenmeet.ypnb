@@ -1,0 +1,81 @@
+{
+ "metadata": {
+  "name": "",
+  "signature": "sha256:14fa5a7df4a9df31ca931ff61d46fc2db6f2da657ef3cf29be0f90aa228fc5b2"
+ },
+ "nbformat": 3,
+ "nbformat_minor": 0,
+ "worksheets": [
+  {
+   "cells": [
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "### Checking what do these cells look like"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "import nltk\n",
+      "import collections\n",
+      "\n",
+      "scount = collections.Counter()\n",
+      "all_lines = []\n",
+      "\n",
+      "f=open('c:/temp/period.txt')\n",
+      "\n",
+      "def cleanup_line(line):\n",
+      "    return line.replace('\\n','').lower().replace('.','')\n",
+      "\n",
+      "for line in f.readlines():\n",
+      "    all_lines.append(cleanup_line(line))\n",
+      "    \n",
+      "scount.update(all_lines)\n",
+      "\n",
+      "N=20\n",
+      "print scount.most_common(N)\n",
+      "# ratio we tackle if we reach top N\n",
+      "print (sum([x[1] for x in scount.most_common(N)])+0.0)/890"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "output_type": "stream",
+       "stream": "stdout",
+       "text": [
+        "[('na', 300), ('once a week', 98), ('weekly', 97), ('twice a week', 23), ('they meet once or twice per week ', 12), ('3 times a week', 10), ('every week', 9), ('once a week ', 9), ('weekly ', 8), ('once per week', 7), ('n/a', 6), ('3 days a week', 5), ('fortnightly', 4), ('every wednesday', 4), ('monthly', 4), ('once every week', 4), ('3 times a week ', 4), ('twice per week', 3), ('every day', 3), ('2 days a week', 3)]\n",
+        "0.688764044944\n"
+       ]
+      }
+     ],
+     "prompt_number": 17
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "_Approach:_\n",
+      "* detect the period (weekly, monthly)\n",
+      "* work back and detect frequency within the period."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "# generate tuple text, period\n",
+      "line_tuples = []\n"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": []
+    }
+   ],
+   "metadata": {}
+  }
+ ]
+}
