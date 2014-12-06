@@ -1,0 +1,61 @@
+---------------------------------------------------------------------------------------------------
+-- Full Query with all columns in requested tables
+---------------------------------------------------------------------------------------------------
+
+SELECT
+*
+FROM "group_project" gp
+JOIN group_project_member gpm ON gp._id = gpm.group_project_id
+LEFT JOIN key_fund_stage_lk kf ON kf._id = gp.key_fund_stage_id
+LEFT JOIN group_member gm ON gm._id = gpm.group_member_id
+JOIN group_project_member_skill_wheel sw ON sw.group_project_member_id = gpm._id
+LEFT JOIN group_project_member_skill_wheel_item swi ON swi.group_project_member_skill_wheel_id = sw._id
+LEFT JOIN skill_ref_lk sr ON sr._id = swi.reference_id 
+
+WHERE
+gp.registered_date >= '2011-10-01'
+
+ORDER BY gp.registered_date DESC
+
+
+
+
+---------------------------------------------------------------------------------------------------
+-- Testing of joins
+---------------------------------------------------------------------------------------------------
+
+SELECT
+gp._id
+,gpm.group_project_id
+
+,gp.key_fund_stage_id
+,kf._id
+
+,gm._id
+,gpm.group_member_id
+
+,gpm._id
+,sw.group_project_member_id
+
+,sw._id
+,swi.group_project_member_skill_wheel_id
+
+,swi.reference_id 
+,sr._id
+
+FROM "group_project" gp
+JOIN group_project_member gpm ON gp._id = gpm.group_project_id
+LEFT JOIN key_fund_stage_lk kf ON kf._id = gp.key_fund_stage_id
+LEFT JOIN group_member gm ON gm._id = gpm.group_member_id
+JOIN group_project_member_skill_wheel sw ON sw.group_project_member_id = gpm._id
+LEFT JOIN group_project_member_skill_wheel_item swi ON swi.group_project_member_skill_wheel_id = sw._id
+LEFT JOIN skill_ref_lk sr ON sr._id = swi.reference_id 
+
+WHERE
+gp.registered_date >= '2011-10-01'
+
+ORDER BY gp.registered_date DESC
+
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+
